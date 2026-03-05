@@ -1,0 +1,60 @@
+name: IaC Static Analysis
+
+permissions:
+    contents: read
+    checks: write
+    id-token: write
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  checkov:
+    name: Checkov Scan
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Checkov
+        run: pip install checkov
+
+      - name: Run Checkov
+        run: |
+          checkov -d . -o junitxml > checkov.test.xml || true
+          checkov -d . -o cli 2>&1 | tee checkov-cli.txt || true
+
+      - name: Publish Checkov JUnit Report
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: checkov.test.xml
+          check_name: Checkov Report
+          fail_on_failure: false
+
+  tfsec:
+    name: tfsec Scan
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tfsec
+        run: |
+          curl -L https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec-linux-amd64 -o /usr/local/bin/tfsec
+          chmod +x /usr/local/bin/tfsec
+
+      - name: Run tfsec
+        run: |
+          tfsec . --format junit --include-passed > tfsec.test.xml || true
+          tfsec . --format lovely --include-passed 2>&1 | tee tfsec-cli.txt || true
+
+      - name: Publish tfsec JUnit Report
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: tfsec.test.xml
+          check_name: tfsec Report
+          fail_on_failure: false
