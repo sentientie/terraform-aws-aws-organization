@@ -11,7 +11,7 @@ accounts:
   - name: "Development"
     email: "test+dev@test.com"
     parent_path: "CoreOU/DevelopmentOU"
-  - name: "Pruduction"
+  - name: "Production"
     email: "test+shared@test.com"
     parent_path: "CoreOU/ProductionOU"
   - name: "Shared"

@@ -82,7 +82,7 @@ module "aws_organization" {
       policies : ["deny_all"]
     },
     {
-      name : "Pruduction",
+      name : "Production",
       email : "test+shared@test.com",
       parent_path : "CoreOU/ProductionOU"
     },
